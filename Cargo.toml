@@ -1,0 +1,9 @@
+[package]
+name = "s3-cleaner"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+aws-config = { version = "1.8.16", features = ["behavior-version-latest", "credentials-login"] }
+aws-sdk-s3 = "1.132.0"
+tokio = { version = "1.52.3", features = ["full"] }
