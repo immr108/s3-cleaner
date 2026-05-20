@@ -1,4 +1,4 @@
-use aws_sdk_s3::{Client, primitives::Length};
+use aws_sdk_s3::Client;
 use dialoguer::Select;
 use std::io;
 
@@ -55,9 +55,36 @@ async fn main() {
     match objects {
         Ok(res) => {
             let contents = res.contents();
-            println!("オブジェクト一覧");
+
             for object in contents {
-                println!("- {}", object.key().unwrap_or("名前なし"));
+                let key = object.key().unwrap_or("");
+                if key.is_empty() {
+                    continue;
+                }
+
+                match client
+                    .delete_object()
+                    .bucket(selected_bucket)
+                    .key(key)
+                    .send()
+                    .await
+                {
+                    Ok(_) => println!("削除しました: {}", key),
+                    Err(e) => {
+                        println!("削除エラー: {}", e);
+                        return;
+                    }
+                }
+            }
+            println!("全オブジェクトの削除が完了しました");
+
+            match client
+            .delete_bucket()
+            .bucket(selected_bucket)
+            .send()
+            .await{
+                Ok(_) => println!("バケットを削除しました: {}", selected_bucket),
+                Err(e)=> println!("バケット削除エラー: {}", e),
             }
         }
         Err(e) => {
